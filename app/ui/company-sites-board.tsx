@@ -3,13 +3,8 @@
 import { useState } from "react";
 
 type SiteRecord = {
-  owner: string;
-  purpose: string;
   status: string;
-  contact: string;
-  stack: string;
-  adminUrl: string;
-  notes: string;
+  docsLink: string;
 };
 
 type CompanySitesBoardProps = {
@@ -18,35 +13,28 @@ type CompanySitesBoardProps = {
 
 const STORAGE_KEY = "crisp-company-sites";
 
+const sitePurposeByUrl: Record<string, string> = {
+  "https://ai.crispai.ca": "AI tools and automation solutions",
+};
+
+const siteStatusByUrl: Record<string, string> = {
+  "https://ai.crispai.ca": "Live",
+};
+
 const fieldLabels: Record<keyof SiteRecord, string> = {
-  owner: "Owner / Team",
-  purpose: "Purpose",
   status: "Status",
-  contact: "Main Contact",
-  stack: "Stack / Access Notes",
-  adminUrl: "Admin / Docs Link",
-  notes: "Notes",
+  docsLink: "Docs Link",
 };
 
 const fieldPlaceholders: Record<keyof SiteRecord, string> = {
-  owner: "Who is responsible for this site?",
-  purpose: "What this website is used for",
   status: "Live, in progress, archived, needs review...",
-  contact: "Email, Slack channel, or person",
-  stack: "CMS, Next.js, n8n flow, hosting, login reference...",
-  adminUrl: "Dashboard, docs, or management URL",
-  notes: "Any important context, tasks, or reminders",
+  docsLink: "Docs, notes page, or management URL",
 };
 
 function createEmptyRecord(): SiteRecord {
   return {
-    owner: "",
-    purpose: "",
     status: "",
-    contact: "",
-    stack: "",
-    adminUrl: "",
-    notes: "",
+    docsLink: "",
   };
 }
 
@@ -136,13 +124,9 @@ export default function CompanySitesBoard({
     const haystack = [
       site,
       siteLabel,
-      siteData?.owner,
-      siteData?.purpose,
+      sitePurposeByUrl[site],
       siteData?.status,
-      siteData?.contact,
-      siteData?.stack,
-      siteData?.adminUrl,
-      siteData?.notes,
+      siteData?.docsLink,
     ]
       .join(" ")
       .toLowerCase();
@@ -216,6 +200,8 @@ export default function CompanySitesBoard({
           {filteredSites.map((site, index) => {
             const siteData = records[site] ?? createEmptyRecord();
             const siteLabel = getSiteLabel(site);
+            const sitePurpose = sitePurposeByUrl[site] ?? "Purpose not added yet";
+            const siteStatus = siteStatusByUrl[site] ?? siteData.status;
 
             return (
               <article
@@ -249,43 +235,50 @@ export default function CompanySitesBoard({
                     {site}
                   </div>
 
+                  <div className="rounded-2xl bg-white px-4 py-4 ring-1 ring-sky-200">
+                    <p className="text-sm font-semibold text-sky-800">Purpose</p>
+                    <p className="mt-2 text-sm leading-6 text-sky-900">
+                      {sitePurpose}
+                    </p>
+                  </div>
+
                   <div className="grid gap-4 md:grid-cols-2">
+                    <label>
+                      <span className="mb-2 block text-sm font-semibold text-sky-800">
+                        Status
+                      </span>
+                      <input
+                        value={siteStatus}
+                        onChange={(event) =>
+                          updateSiteRecord(site, "status", event.target.value)
+                        }
+                        placeholder={fieldPlaceholders.status}
+                        className="w-full rounded-2xl border border-sky-200 bg-white px-4 py-3 text-sm text-sky-950 outline-none transition placeholder:text-sky-400 focus:border-sky-500 focus:ring-4 focus:ring-sky-200/60"
+                      />
+                    </label>
+
                     {(
-                      Object.keys(fieldLabels) as Array<keyof SiteRecord>
+                      Object.keys(fieldLabels).filter(
+                        (field) => field !== "status",
+                      ) as Array<keyof SiteRecord>
                     ).map((field) => {
-                      const isNotes = field === "notes";
                       const inputClasses =
                         "w-full rounded-2xl border border-sky-200 bg-white px-4 py-3 text-sm text-sky-950 outline-none transition placeholder:text-sky-400 focus:border-sky-500 focus:ring-4 focus:ring-sky-200/60";
 
                       return (
-                        <label
-                          key={field}
-                          className={isNotes ? "md:col-span-2" : ""}
-                        >
+                        <label key={field}>
                           <span className="mb-2 block text-sm font-semibold text-sky-800">
                             {fieldLabels[field]}
                           </span>
 
-                          {isNotes ? (
-                            <textarea
-                              value={siteData[field]}
-                              onChange={(event) =>
-                                updateSiteRecord(site, field, event.target.value)
-                              }
-                              rows={5}
-                              placeholder={fieldPlaceholders[field]}
-                              className={`${inputClasses} resize-y`}
-                            />
-                          ) : (
-                            <input
-                              value={siteData[field]}
-                              onChange={(event) =>
-                                updateSiteRecord(site, field, event.target.value)
-                              }
-                              placeholder={fieldPlaceholders[field]}
-                              className={inputClasses}
-                            />
-                          )}
+                          <input
+                            value={siteData[field]}
+                            onChange={(event) =>
+                              updateSiteRecord(site, field, event.target.value)
+                            }
+                            placeholder={fieldPlaceholders[field]}
+                            className={inputClasses}
+                          />
                         </label>
                       );
                     })}
