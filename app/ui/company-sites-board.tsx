@@ -21,6 +21,10 @@ const siteStatusByUrl: Record<string, string> = {
   "https://ai.crispai.ca": "Live",
 };
 
+const siteDocsLinkByUrl: Record<string, string> = {
+  "https://ai.crispai.ca/api/leads": "https://ai.crispai.ca/api/leads",
+};
+
 const fieldLabels: Record<keyof SiteRecord, string> = {
   status: "Status",
   docsLink: "Docs Link",
