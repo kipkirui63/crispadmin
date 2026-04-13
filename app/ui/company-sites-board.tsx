@@ -15,14 +15,63 @@ const STORAGE_KEY = "crisp-company-sites";
 
 const sitePurposeByUrl: Record<string, string> = {
   "https://ai.crispai.ca": "AI tools and automation solutions",
+  "https://aielevatechallenge.crispai.ca": "AI elevate challenges",
+  "https://aitwin.crispai.ca": "AI talking twin",
+  "https://all.crispai.ca": "CrispAI marketplace backend",
+  "https://appointmentbooking.crispai.ca": "Appointment booking system",
+  "https://bootcamp.crispai.ca": "Bootcamp",
+  "https://businessagent.crispai.ca": "Business intelligence analysis",
+  "https://businessintelligenceagent.crispai.ca": "Business prediction",
+  "https://canvaslms.crispai.ca": "Crisp Canvas",
+  "https://certificates.crispai.ca": "Crisp bootcamp certificates",
+  "https://crispwrite.crispai.ca": "AI tools",
+  "https://emailscrapper.crispai.ca": "Scrape emails and leads and contacts",
+  "https://labs.crispai.ca": "CrispAI automations",
+  "https://marketplace.crispai.ca": "Crisp AI marketplace",
+  "https://n8n.crispai.ca": "Hosted n8n",
+  "https://reflections.crispai.ca": "Bootcamp reflections",
+  "https://toolsio.crispai.ca": "Crisp image and video tools",
+  "https://utm.crispai.ca": "UTM links",
 };
 
 const siteStatusByUrl: Record<string, string> = {
   "https://ai.crispai.ca": "Live",
+  "https://aielevatechallenge.crispai.ca": "Review",
+  "https://aitwin.crispai.ca": "Live",
+  "https://all.crispai.ca": "Live",
+  "https://appointmentbooking.crispai.ca": "Live",
+  "https://bootcamp.crispai.ca": "Live",
+  "https://businessagent.crispai.ca": "Live",
+  "https://businessintelligenceagent.crispai.ca": "Live",
+  "https://canvaslms.crispai.ca": "Live",
+  "https://certificates.crispai.ca": "Live",
+  "https://crispwrite.crispai.ca": "Live",
+  "https://customgpts.crispai.ca": "Live",
+  "https://emailscrapper.crispai.ca": "Live",
+  "https://labs.crispai.ca": "Live",
+  "https://marketplace.crispai.ca": "Live",
+  "https://n8n.crispai.ca": "Live",
+  "https://reflections.crispai.ca": "Live",
+  "https://toolsio.crispai.ca": "Live",
+  "https://utm.crispai.ca": "Live",
 };
 
 const siteDocsLinkByUrl: Record<string, string> = {
-  "https://ai.crispai.ca/api/leads": "https://ai.crispai.ca/api/leads",
+  "https://ai.crispai.ca": "https://ai.crispai.ca/api/leads",
+  "https://aitwin.crispai.ca": "https://aitwin.crispai.ca/admin",
+  "https://bootcamp.crispai.ca": "https://bootcamp.crispai.ca/admin",
+  "https://customgpts.crispai.ca": "https://ai.crispai.ca/api/leads",
+  "https://businessintelligenceagent.crispai.ca":
+    "https://businessintelligenceagent.crispai.ca",
+  "https://canvaslms.crispai.ca": "https://canvaslms.crispai.ca",
+  "https://crispwrite.crispai.ca": "https://crispwrite.crispai.ca/admin",
+  "https://labs.crispai.ca":
+    "https://drive.google.com/drive/folders/1DU3bxrGXf9B3YrSOFocNnT_1i6iL1Ibr",
+  "https://toolsio.crispai.ca": "https://toolsio.crispai.ca/admin",
+};
+
+const hideDocsActionByUrl: Record<string, boolean> = {
+  "https://aitwin.crispai.ca": true,
 };
 
 const fieldLabels: Record<keyof SiteRecord, string> = {
@@ -75,14 +124,6 @@ function getInitialRecords(sites: string[]) {
   }
 }
 
-function getInitialSavedAt() {
-  if (typeof window === "undefined") {
-    return "";
-  }
-
-  return window.localStorage.getItem(`${STORAGE_KEY}:saved-at`) ?? "";
-}
-
 function getSiteLabel(site: string) {
   const hostname = new URL(site).hostname.replace(".crispai.ca", "");
   return hostname
@@ -100,7 +141,6 @@ export default function CompanySitesBoard({
     getInitialRecords(sites),
   );
   const [query, setQuery] = useState("");
-  const [savedAt, setSavedAt] = useState<string>(() => getInitialSavedAt());
 
   function updateSiteRecord(
     site: string,
@@ -117,7 +157,6 @@ export default function CompanySitesBoard({
 
     const nextSavedAt = formatSavedAt(new Date());
     setRecords(nextRecords);
-    setSavedAt(nextSavedAt);
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextRecords));
     window.localStorage.setItem(`${STORAGE_KEY}:saved-at`, nextSavedAt);
   }
@@ -138,16 +177,6 @@ export default function CompanySitesBoard({
     return haystack.includes(query.toLowerCase());
   });
 
-  const completedSites = sites.filter((site) => {
-    const siteData = records[site];
-
-    if (!siteData) {
-      return false;
-    }
-
-    return Object.values(siteData).some((value) => value.trim().length > 0);
-  }).length;
-
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.95),_rgba(193,233,255,0.92)_40%,_rgba(121,196,255,0.75)_100%)] px-4 py-8 text-sky-950 sm:px-6 lg:px-10">
       <section className="mx-auto flex w-full max-w-7xl flex-col gap-6">
@@ -158,29 +187,14 @@ export default function CompanySitesBoard({
                 Crisp AI Web Directory
               </p>
               <h1 className="mt-3 font-serif text-4xl font-semibold tracking-tight text-sky-950 sm:text-5xl">
-                Company websites, ownership, and operational notes in one place
+                CrispAI links
               </h1>
-              <p className="mt-4 max-w-2xl text-base leading-7 text-sky-900/75 sm:text-lg">
-                Each site has its own section so you can track purpose, owner,
-                status, admin links, and any extra context. Entries save in this
-                browser automatically.
-              </p>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid gap-3 sm:grid-cols-1">
               <div className="rounded-2xl bg-sky-950 px-5 py-4 text-white">
                 <p className="text-sm text-sky-100/75">Total Sites</p>
                 <p className="mt-2 text-3xl font-semibold">{sites.length}</p>
-              </div>
-              <div className="rounded-2xl bg-sky-100 px-5 py-4">
-                <p className="text-sm text-sky-700">Updated Records</p>
-                <p className="mt-2 text-3xl font-semibold">{completedSites}</p>
-              </div>
-              <div className="rounded-2xl bg-white px-5 py-4 ring-1 ring-sky-200">
-                <p className="text-sm text-sky-700">Last Saved</p>
-                <p className="mt-2 text-sm font-medium text-sky-950">
-                  {savedAt || "Waiting for first edit"}
-                </p>
               </div>
             </div>
           </div>
@@ -206,6 +220,7 @@ export default function CompanySitesBoard({
             const siteLabel = getSiteLabel(site);
             const sitePurpose = sitePurposeByUrl[site] ?? "Purpose not added yet";
             const siteStatus = siteStatusByUrl[site] ?? siteData.status;
+            const siteDocsLink = siteDocsLinkByUrl[site] ?? siteData.docsLink;
 
             return (
               <article
@@ -275,14 +290,41 @@ export default function CompanySitesBoard({
                             {fieldLabels[field]}
                           </span>
 
-                          <input
-                            value={siteData[field]}
-                            onChange={(event) =>
-                              updateSiteRecord(site, field, event.target.value)
-                            }
-                            placeholder={fieldPlaceholders[field]}
-                            className={inputClasses}
-                          />
+                          {field === "docsLink" ? (
+                            <div className="flex flex-col gap-3">
+                              <input
+                                value={siteDocsLink}
+                                onChange={(event) =>
+                                  updateSiteRecord(
+                                    site,
+                                    field,
+                                    event.target.value,
+                                  )
+                                }
+                                placeholder={fieldPlaceholders[field]}
+                                className={inputClasses}
+                              />
+                              {siteDocsLink && !hideDocsActionByUrl[site] ? (
+                                <a
+                                  href={siteDocsLink}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="inline-flex w-fit items-center rounded-full bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
+                                >
+                                  Open Docs
+                                </a>
+                              ) : null}
+                            </div>
+                          ) : (
+                            <input
+                              value={siteData[field]}
+                              onChange={(event) =>
+                                updateSiteRecord(site, field, event.target.value)
+                              }
+                              placeholder={fieldPlaceholders[field]}
+                              className={inputClasses}
+                            />
+                          )}
                         </label>
                       );
                     })}
