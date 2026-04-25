@@ -5,6 +5,7 @@ import { useState } from "react";
 type SiteRecord = {
   status: string;
   docsLink: string;
+  repoLink: string;
 };
 
 type CompanySitesBoardProps = {
@@ -70,6 +71,42 @@ const siteDocsLinkByUrl: Record<string, string> = {
   "https://toolsio.crispai.ca": "https://toolsio.crispai.ca/admin",
 };
 
+const siteRepoLinkByUrl: Record<string, string> = {
+  "https://ai.crispai.ca": "https://github.com/Crispai-collab/ai-tools",
+  "https://aielevatechallenge.crispai.ca":
+    "https://github.com/Crispai-collab/ai-elevate-challenge",
+  "https://aitwin.crispai.ca": "https://github.com/Crispai-collab/AI-Twin",
+  "https://all.crispai.ca":
+    "https://github.com/Crispai-collab/Backend-market-place",
+  "https://appointmentbooking.crispai.ca":
+    "https://github.com/Crispai-collab/appointment-booking",
+  "https://bootcamp.crispai.ca":
+    "https://github.com/Crispai-collab/Crips-bootcamps",
+  "https://businessagent.crispai.ca":
+    "https://github.com/Crispai-collab/streamlit-business-agent",
+  "https://businessintelligenceagent.crispai.ca":
+    "https://github.com/Crispai-collab/Business--Intelligence-Agent-prediction-Tools",
+  "https://canvaslms.crispai.ca":
+    "https://github.com/Crispai-collab/Crisp-lms",
+  "https://certificates.crispai.ca":
+    "https://github.com/Crispai-collab/certificates",
+  "https://crispwrite.crispai.ca":
+    "https://github.com/Crispai-collab/Crisp__write",
+  "https://customgpts.crispai.ca":
+    "https://github.com/Crispai-collab/custom-gpts",
+  "https://emailscrapper.crispai.ca":
+    "https://github.com/Crispai-collab/email_scrapper",
+  "https://labs.crispai.ca": "https://github.com/Crispai-collab/labs",
+  "https://marketplace.crispai.ca":
+    "https://github.com/Crispai-collab/Front-end-Marketplace-marketplace",
+  "https://reflections.crispai.ca":
+    "https://github.com/Crispai-collab/Reflections",
+  "https://toolsio.crispai.ca":
+    "https://github.com/Crispai-collab/Image-Video-Tools-toolsio",
+  "https://utm.crispai.ca":
+    "https://github.com/Crispai-collab/Utm-Links",
+};
+
 const hideDocsActionByUrl: Record<string, boolean> = {
   "https://aitwin.crispai.ca": true,
 };
@@ -77,17 +114,20 @@ const hideDocsActionByUrl: Record<string, boolean> = {
 const fieldLabels: Record<keyof SiteRecord, string> = {
   status: "Status",
   docsLink: "Docs Link",
+  repoLink: "Git Repo",
 };
 
 const fieldPlaceholders: Record<keyof SiteRecord, string> = {
   status: "Live, in progress, archived, needs review...",
   docsLink: "Docs, notes page, or management URL",
+  repoLink: "GitHub repo URL or repository name",
 };
 
 function createEmptyRecord(): SiteRecord {
   return {
     status: "",
     docsLink: "",
+    repoLink: "",
   };
 }
 
@@ -132,6 +172,20 @@ function getSiteLabel(site: string) {
     .split(/[-]/)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
+}
+
+function getRepoHref(repoLink: string) {
+  if (!repoLink) {
+    return null;
+  }
+
+  try {
+    const parsedUrl = new URL(repoLink);
+
+    return ["http:", "https:"].includes(parsedUrl.protocol) ? repoLink : null;
+  } catch {
+    return `https://github.com/search?q=${encodeURIComponent(repoLink)}&type=repositories`;
+  }
 }
 
 export default function CompanySitesBoard({
@@ -221,6 +275,8 @@ export default function CompanySitesBoard({
             const sitePurpose = sitePurposeByUrl[site] ?? "Purpose not added yet";
             const siteStatus = siteStatusByUrl[site] ?? siteData.status;
             const siteDocsLink = siteDocsLinkByUrl[site] ?? siteData.docsLink;
+            const siteRepoLink = siteRepoLinkByUrl[site] ?? siteData.repoLink;
+            const repoHref = getRepoHref(siteRepoLink);
 
             return (
               <article
@@ -312,6 +368,33 @@ export default function CompanySitesBoard({
                                   className="inline-flex w-fit items-center rounded-full bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
                                 >
                                   Open Docs
+                                </a>
+                              ) : null}
+                            </div>
+                          ) : field === "repoLink" ? (
+                            <div className="flex flex-col gap-3">
+                              <input
+                                value={siteRepoLink}
+                                onChange={(event) =>
+                                  updateSiteRecord(
+                                    site,
+                                    field,
+                                    event.target.value,
+                                  )
+                                }
+                                placeholder={fieldPlaceholders[field]}
+                                className={inputClasses}
+                              />
+                              {repoHref ? (
+                                <a
+                                  href={repoHref}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="inline-flex w-fit items-center rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
+                                >
+                                  {siteRepoLink.startsWith("http")
+                                    ? "Open Repo"
+                                    : "Search Repo"}
                                 </a>
                               ) : null}
                             </div>
